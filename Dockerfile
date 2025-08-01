@@ -50,13 +50,21 @@ RUN dotnet tool install --global dotnet-ef && \
     dotnet tool install --global dotnet-aspnet-codegenerator
 
 # Pre-install VS Code extensions
-RUN code-server --install-extension ms-vscode.vscode-typescript-next && \
-    code-server --install-extension ms-dotnettools.csharp && \
-    code-server --install-extension ms-dotnettools.vscode-dotnet-runtime && \
-    code-server --install-extension bradlc.vscode-tailwindcss && \
-    code-server --install-extension esbenp.prettier-vscode && \
-    code-server --install-extension ms-vscode.vscode-json && \
-    code-server --install-extension ms-vscode.vscode-eslint
+RUN mkdir -p /home/coder/scripts
+COPY --chown=coder:coder <<EOF /home/coder/scripts/install-extensions.sh
+#!/bin/bash
+echo "Installing VS Code extensions..."
+code-server --install-extension ms-vscode.vscode-typescript-next
+code-server --install-extension ms-dotnettools.csharp
+code-server --install-extension ms-dotnettools.vscode-dotnet-runtime
+code-server --install-extension bradlc.vscode-tailwindcss
+code-server --install-extension esbenp.prettier-vscode
+code-server --install-extension ms-vscode.vscode-json
+code-server --install-extension ms-vscode.vscode-eslint
+echo "Extensions installation completed!"
+EOF
+
+RUN chmod +x /home/coder/scripts/install-extensions.sh
 
 # Create .vscode directory and copy settings if they exist
 RUN mkdir -p /home/coder/workspace/.vscode
