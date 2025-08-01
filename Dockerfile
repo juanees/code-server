@@ -79,4 +79,4 @@ EXPOSE 8080 3000 5000 5001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080 || exit 1
 
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none"]
+CMD ["code-server", "--bind-addr", "0.0.0.0:8080"]
