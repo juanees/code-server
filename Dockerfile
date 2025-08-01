@@ -45,7 +45,7 @@ RUN npm install -g \
 RUN dotnet tool install --global dotnet-ef \
     && dotnet tool install --global dotnet-aspnet-codegenerator
 
- Switch back to coder user
+# Switch back to coder user
 USER coder
 
 # Set up environment variables
