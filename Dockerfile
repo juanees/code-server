@@ -61,8 +61,9 @@ RUN code-server --install-extension ms-vscode.vscode-typescript-next && \
 # Create .vscode directory and copy settings if they exist
 RUN mkdir -p /home/coder/workspace/.vscode
 
-# Copy VS Code settings (only if the directory exists)
-COPY --chown=coder:coder vscode-settings/ /home/coder/workspace/.vscode/ 2>/dev/null || true
+# Create .vscode directory and copy your custom settings
+RUN mkdir -p /home/coder/workspace/.vscode
+COPY --chown=coder:coder vscode-settings/ /home/coder/workspace/.vscode/
 
 # Set up environment variables
 ENV NODE_ENV=development \
