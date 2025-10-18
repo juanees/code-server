@@ -1,5 +1,8 @@
 FROM codercom/code-server:latest
 
+# Set Go version as a build argument for easy updates
+ARG GO_VERSION=1.22.5
+
 USER root
 
 # Update system packages and install essential tools
@@ -27,8 +30,13 @@ RUN wget https://dot.net/v1/dotnet-install.sh && \
     ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
     rm dotnet-install.sh
 
-# Add .NET to PATH for all users
+# Add .NET to PATH for all users (for interactive shells)
 RUN echo 'export PATH="$PATH:/usr/share/dotnet"' >> /etc/bash.bashrc
+
+# Install Go
+RUN wget "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -O go.tar.gz && \
+    tar -C /usr/local -xzf go.tar.gz && \
+    rm go.tar.gz
 
 # Install global npm packages
 RUN npm install -g \
@@ -42,7 +50,7 @@ RUN npm install -g \
     vite \
     concurrently
 
-# Switch back to coder user for .NET tools installation
+# Switch back to coder user for tools installation
 USER coder
 
 # Install .NET global tools
@@ -54,6 +62,7 @@ RUN mkdir -p /home/coder/scripts
 COPY --chown=coder:coder <<EOF /home/coder/scripts/install-extensions.sh
 #!/bin/bash
 echo "Installing VS Code extensions..."
+code-server --install-extension golang.go
 code-server --install-extension ms-vscode.vscode-typescript-next
 code-server --install-extension ms-dotnettools.csharp
 code-server --install-extension ms-dotnettools.vscode-dotnet-runtime
@@ -74,15 +83,16 @@ RUN mkdir -p /home/coder/workspace/.vscode
 COPY --chown=coder:coder vscode-settings/ /home/coder/workspace/.vscode/
 
 # Set up environment variables
+# Add Go and .NET tools to the PATH
 ENV NODE_ENV=development \
     DOTNET_ENVIRONMENT=Development \
     ASPNETCORE_URLS=http://localhost:5000 \
-    PATH="${PATH}:/home/coder/.dotnet/tools"
+    PATH="/usr/local/go/bin:${PATH}:/home/coder/.dotnet/tools"
 
 WORKDIR /home/coder/workspace
 
 # Expose ports for code-server and development servers
-EXPOSE 8080 3000 5000 5001
+EXPOSE 8080 3000 4200 5000 5001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
